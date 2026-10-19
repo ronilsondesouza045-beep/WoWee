@@ -1192,10 +1192,13 @@ void WMORenderer::setInstancePosition(uint32_t instanceId, const glm::vec3& posi
     auto idxIt = instanceIndexById.find(instanceId);
     if (idxIt == instanceIndexById.end()) return;
     auto& inst = instances[idxIt->second];
+    const glm::vec3 oldMin = inst.worldBoundsMin;
+    const glm::vec3 oldMax = inst.worldBoundsMax;
     inst.position = position;
     inst.updateModelMatrix();
     refreshInstanceBounds(inst);
-    rebuildSpatialIndex();
+    refileBounds(spatialGrid, oldMin, oldMax,
+                 inst.worldBoundsMin, inst.worldBoundsMax, inst.id);
 }
 
 void WMORenderer::setInstanceIsTransport(uint32_t instanceId, bool isTransport) {
@@ -1214,6 +1217,9 @@ void WMORenderer::setInstanceTransform(uint32_t instanceId, const glm::mat4& tra
     auto idxIt = instanceIndexById.find(instanceId);
     if (idxIt == instanceIndexById.end()) return;
     auto& inst = instances[idxIt->second];
+
+    const glm::vec3 oldMin = inst.worldBoundsMin;
+    const glm::vec3 oldMax = inst.worldBoundsMax;
 
     // Decompose transform to position/rotation/scale
     inst.position = glm::vec3(transform[3]);
@@ -1236,6 +1242,8 @@ void WMORenderer::setInstanceTransform(uint32_t instanceId, const glm::mat4& tra
     inst.invModelMatrix = glm::inverse(transform);
 
     refreshInstanceBounds(inst);
+    refileBounds(spatialGrid, oldMin, oldMax,
+                 inst.worldBoundsMin, inst.worldBoundsMax, inst.id);
 
     // Propagate transform to child M2 doodads (chairs, furniture on transports)
     if (m2Renderer_ && !inst.doodads.empty()) {
@@ -1244,8 +1252,6 @@ void WMORenderer::setInstanceTransform(uint32_t instanceId, const glm::mat4& tra
             m2Renderer_->setInstanceTransform(doodad.m2InstanceId, worldTransform);
         }
     }
-
-    rebuildSpatialIndex();
 }
 
 void WMORenderer::addDoodadToInstance(uint32_t instanceId, uint32_t m2InstanceId, const glm::mat4& localTransform) {
