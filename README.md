@@ -1,3 +1,29 @@
+# WoWee Android — APK otimizado (GMDERKEN)
+
+<img width="320" src="https://images.mein-mmo.de/medien/2020/09/WoW-Shadowlands-Blizzard-Game-Master-GM-no-titel-title-1280x720-1.jpg" alt="World of Warcraft">
+
+Cliente **World of Warcraft 3.3.5 (WotLK)** para **Android arm64**, otimizado para rodar bem em celular: menos uso de memória, carregamento mais rápido e mais FPS.
+
+## Baixar e instalar
+
+1. Baixe o APK em **[Releases → apk-latest](https://github.com/ronilsondesouza045-beep/WoWee/releases/tag/apk-latest)**.
+2. Instale no celular (permita "instalar de fontes desconhecidas").
+3. Abra o app e entre no mundo.
+
+**É só instalar o APK — não precisa de root.** Para jogar, os dados do jogo 3.3.5 precisam estar no aparelho, na pasta `Android/media/com.wowee.client/Data`.
+
+## Desenvolvedor
+
+- **GMDERKEN**
+- WhatsApp: **(21) 98902-4806**
+- Suporte, versões personalizadas ou trabalhos de desenvolvimento: é só chamar.
+
+> APK e otimizações por GMDERKEN. Projeto base open-source: [WoWee](https://github.com/Kelsidavis/WoWee).
+
+---
+
+## Documentação original do projeto
+
 # WoWee - World of Warcraft Engine Experiment
 
 <p align="center">
