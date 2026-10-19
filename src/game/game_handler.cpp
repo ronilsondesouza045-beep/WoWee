@@ -720,7 +720,8 @@ void GameHandler::update(float deltaTime) {
         stageClock = now;
         return ms;
     };
-    float msNet = 0.0f, msState = 0.0f, msWorld = 0.0f, msInterp = 0.0f;
+    float msNet = 0.0f, msState = 0.0f, msTriggers = 0.0f, msUiTick = 0.0f;
+    float msTaxi = 0.0f, msAttack = 0.0f, msClose = 0.0f, msInterp = 0.0f;
 
     updateNetworking();
     if (!socket) return;  // disconnect() may have been called
@@ -888,6 +889,8 @@ void GameHandler::update(float deltaTime) {
             }
         }
 
+        msTriggers = stageMs();
+
         // Update combat text (Phase 2)
         updateCombatText(deltaTime);
         tickMinimapPings(deltaTime);
@@ -895,6 +898,7 @@ void GameHandler::update(float deltaTime) {
 
         // Tick logout countdown
         if (socialHandler_) socialHandler_->updateLogoutCountdown(deltaTime);
+        msUiTick = stageMs();
 
         updateTaxiAndMountState(deltaTime);
 
@@ -904,8 +908,10 @@ void GameHandler::update(float deltaTime) {
             transportManager_->update(deltaTime);
             updateAttachedTransportChildren(deltaTime);
         }
+        msTaxi = stageMs();
 
         updateAutoAttack(deltaTime);
+        msAttack = stageMs();
         auto closeIfTooFar = [&](bool windowOpen, uint64_t npcGuid, auto closeFn, const char* label) {
             if (!windowOpen || npcGuid == 0) return;
             auto npc = entityController_->getEntityManager().getEntity(npcGuid);
@@ -961,26 +967,36 @@ void GameHandler::update(float deltaTime) {
                       [this]{ closeTaxi(); }, "Taxi window");
         closeIfTooFar(isTrainerWindowOpen(), getTrainerSpells().trainerGuid, [this]{ closeTrainer(); }, "Trainer");
 
-        msWorld = stageMs();
+        msClose = stageMs();
         updateEntityInterpolation(deltaTime);
         msInterp = stageMs();
 
         {
-            static double accNet = 0.0, accState = 0.0, accWorld = 0.0, accInterp = 0.0;
+            static double accNet = 0.0, accState = 0.0, accTriggers = 0.0, accUiTick = 0.0;
+            static double accTaxi = 0.0, accAttack = 0.0, accClose = 0.0, accInterp = 0.0;
             static int frames = 0;
             static auto windowStart = std::chrono::steady_clock::now();
             accNet += msNet;
             accState += msState;
-            accWorld += msWorld;
+            accTriggers += msTriggers;
+            accUiTick += msUiTick;
+            accTaxi += msTaxi;
+            accAttack += msAttack;
+            accClose += msClose;
             accInterp += msInterp;
             ++frames;
             if (std::chrono::duration<float>(std::chrono::steady_clock::now() - windowStart).count() >= 10.0f) {
                 LOG_INFO("update breakdown: net ", static_cast<float>(accNet / frames),
-                         "ms, state ", static_cast<float>(accState / frames),
-                         "ms, world ", static_cast<float>(accWorld / frames),
-                         "ms, interp ", static_cast<float>(accInterp / frames),
-                         "ms, entities ", entityController_->getEntityManager().getEntities().size());
-                accNet = accState = accWorld = accInterp = 0.0;
+                         " state ", static_cast<float>(accState / frames),
+                         " triggers ", static_cast<float>(accTriggers / frames),
+                         " ui ", static_cast<float>(accUiTick / frames),
+                         " taxi ", static_cast<float>(accTaxi / frames),
+                         " attack ", static_cast<float>(accAttack / frames),
+                         " close ", static_cast<float>(accClose / frames),
+                         " interp ", static_cast<float>(accInterp / frames),
+                         " entities ", entityController_->getEntityManager().getEntities().size());
+                accNet = accState = accTriggers = accUiTick = 0.0;
+                accTaxi = accAttack = accClose = accInterp = 0.0;
                 frames = 0;
                 windowStart = std::chrono::steady_clock::now();
             }
