@@ -791,17 +791,26 @@ bool VkContext::createLogicalDevice() {
         features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
         features2.pNext = &supported11;
         vkGetPhysicalDeviceFeatures2(physicalDevice, &features2);
-        if (supported12.shaderFloat16) {
+        // The four 1.2 feature enables below are tied to 1.2 device-level
+        // entry points. Those are resolved through vkGetDeviceProcAddr and
+        // stay null on a device that only reaches 1.1, whatever the loader's
+        // instance reports: seen on an Adreno 642L (instance 1.3, device
+        // 1.1.128), where timelineSemaphore read back true, the semaphore
+        // was created, and the first beginFrame called a null
+        // vkWaitSemaphores (SIGSEGV at pc=0). The 1.1 storage features are
+        // left alone - they are legal on the device they are asked of.
+        const bool device12 = deviceApiVersion_ >= VK_API_VERSION_1_2;
+        if (device12 && supported12.shaderFloat16) {
             enabled12.shaderFloat16 = VK_TRUE;
             LOG_INFO("Enabling shaderFloat16 for FSR2/FSR3 compute shaders");
         }
-        if (supported12.shaderInt8) {
+        if (device12 && supported12.shaderInt8) {
             enabled12.shaderInt8 = VK_TRUE;
         }
         // Core in 1.2 and required of any 1.2 implementation, but the query
         // costs nothing and this block only runs when the instance reached
         // 1.2 at all -- on a 1.1 instance the frame ring stays on fences.
-        if (supported12.timelineSemaphore) {
+        if (device12 && supported12.timelineSemaphore) {
             enabled12.timelineSemaphore = VK_TRUE;
             timelineSemaphoreSupported_ = true;
             LOG_INFO("Enabling timelineSemaphore for frame synchronisation");
@@ -810,7 +819,7 @@ bool VkContext::createLogicalDevice() {
         // selects the fp16 shader permutations, whose wave/subgroup reductions
         // operate on 16-bit types - that needs shaderSubgroupExtendedTypes.
         // Without it, ffxCreateContext fails building those pipelines (rc=3).
-        if (supported12.shaderSubgroupExtendedTypes) {
+        if (device12 && supported12.shaderSubgroupExtendedTypes) {
             enabled12.shaderSubgroupExtendedTypes = VK_TRUE;
             LOG_INFO("Enabling shaderSubgroupExtendedTypes for FSR3 fp16 wave ops");
         }
@@ -1381,7 +1390,14 @@ void VkContext::createGpuQueryPools() {
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, families.data());
     const uint32_t validBits = (graphicsQueueFamily < familyCount)
         ? families[graphicsQueueFamily].timestampValidBits : 0;
-    gpuTimingSupported_ = (timestampPeriodNs_ > 0.0f) && (validBits > 0);
+    // vkCmdResetQueryPool is core 1.2 and a device-level command behind
+    // vkGetDeviceProcAddr: a 1.1 device leaves the pointer null even when
+    // the queue timestamps fine (seen on an Adreno 642L, instance 1.3,
+    // device 1.1.128, where beginFrame reached it and took SIGSEGV at
+    // pc=0). A device that cannot take the reset call keeps the feature
+    // off; the marks themselves would come from a call that is as null.
+    gpuTimingSupported_ = (deviceApiVersion_ >= VK_API_VERSION_1_2) &&
+                          (timestampPeriodNs_ > 0.0f) && (validBits > 0);
     if (!gpuTimingSupported_) {
         LOG_WARNING("GPU timing unavailable: timestampPeriod=", timestampPeriodNs_,
                     ", the graphics queue reports ", validBits,
