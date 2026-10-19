@@ -117,12 +117,25 @@ public class WoweeActivity extends SDLActivity {
     /**
      * True if anything other than the JSON profiles the APK itself carries is
      * present, which is the cheapest test for "the player copied data in".
+     *
+     * A root that holds only expansions/ and opcodes/ still counts: the client
+     * reads all of its data through expansions/<id>/, and an expansion with a
+     * manifest.json beside it is a built set. Without this second look, a root
+     * whose every game file sits under an expansion - which is the layout the
+     * client itself writes and reads - is mistaken for an empty one.
      */
     private boolean hasGameData(File data) {
         String[] entries = data.list();
         if (entries == null) return false;
         for (String entry : entries) {
             if (!entry.equals("expansions") && !entry.equals("opcodes")) return true;
+        }
+        File expansions = new File(data, "expansions");
+        String[] ids = expansions.list();
+        if (ids != null) {
+            for (String id : ids) {
+                if (new File(expansions, id + "/manifest.json").isFile()) return true;
+            }
         }
         return false;
     }
