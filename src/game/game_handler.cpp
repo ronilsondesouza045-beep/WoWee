@@ -713,6 +713,15 @@ void GameHandler::update(float deltaTime) {
         return;
     }
 
+    auto stageClock = std::chrono::steady_clock::now();
+    auto stageMs = [&stageClock]() {
+        const auto now = std::chrono::steady_clock::now();
+        const float ms = std::chrono::duration<float, std::milli>(now - stageClock).count();
+        stageClock = now;
+        return ms;
+    };
+    float msNet = 0.0f, msState = 0.0f, msWorld = 0.0f, msInterp = 0.0f;
+
     updateNetworking();
     if (!socket) return;  // disconnect() may have been called
 
@@ -720,6 +729,7 @@ void GameHandler::update(float deltaTime) {
     // without this the server's check goes unanswered and it drops the
     // connection a few seconds later.
     if (wardenHandler_) wardenHandler_->update(deltaTime);
+    msNet = stageMs();
 
     // Fallback for CMSG_CHAR_DELETE with no server response: if the server
     // doesn't send SMSG_CHAR_DELETE within 3 seconds, re-request the character
@@ -788,6 +798,7 @@ void GameHandler::update(float deltaTime) {
     // may be changed. Two sources, two edges, at slightly different moments.
 
     updateTimers(deltaTime);
+    msState = stageMs();
 
     // Send periodic heartbeat if in world
     if (state == WorldState::IN_WORLD) {
@@ -950,7 +961,30 @@ void GameHandler::update(float deltaTime) {
                       [this]{ closeTaxi(); }, "Taxi window");
         closeIfTooFar(isTrainerWindowOpen(), getTrainerSpells().trainerGuid, [this]{ closeTrainer(); }, "Trainer");
 
+        msWorld = stageMs();
         updateEntityInterpolation(deltaTime);
+        msInterp = stageMs();
+
+        {
+            static double accNet = 0.0, accState = 0.0, accWorld = 0.0, accInterp = 0.0;
+            static int frames = 0;
+            static auto windowStart = std::chrono::steady_clock::now();
+            accNet += msNet;
+            accState += msState;
+            accWorld += msWorld;
+            accInterp += msInterp;
+            ++frames;
+            if (std::chrono::duration<float>(std::chrono::steady_clock::now() - windowStart).count() >= 10.0f) {
+                LOG_INFO("update breakdown: net ", static_cast<float>(accNet / frames),
+                         "ms, state ", static_cast<float>(accState / frames),
+                         "ms, world ", static_cast<float>(accWorld / frames),
+                         "ms, interp ", static_cast<float>(accInterp / frames),
+                         "ms, entities ", entityController_->getEntityManager().getEntities().size());
+                accNet = accState = accWorld = accInterp = 0.0;
+                frames = 0;
+                windowStart = std::chrono::steady_clock::now();
+            }
+        }
 
     }
 }

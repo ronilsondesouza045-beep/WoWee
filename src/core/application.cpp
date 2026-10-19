@@ -3697,7 +3697,7 @@ void Application::updateInGame(float deltaTime, const char*& updateCheckpoint) {
         }
     });
     if (addonManager_ && addonsLoaded_) {
-        addonManager_->update(deltaTime);
+        runInGameStage("addonManager->update", [&] { addonManager_->update(deltaTime); });
     }
     // Always unsheath on combat engage.
     inGameStep = "auto-unsheathe";
