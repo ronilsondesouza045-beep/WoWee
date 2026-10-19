@@ -2,6 +2,7 @@ package com.wowee.client;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -63,6 +64,17 @@ public class WoweeActivity extends SDLActivity {
         }
 
         File data = new File(root, "Data");
+        // Android 13 and newer stop adb from writing into Android/data, the
+        // directory above. Android/media/<package> stays both adb-writable and
+        // readable without permissions, so whoever cannot reach the first one
+        // puts the data under the second, and it is taken when it is the one
+        // that has it.
+        File mediaData = new File(Environment.getExternalStorageDirectory(),
+                "Android/media/" + getPackageName() + "/Data");
+        if (!hasGameData(data) && hasGameData(mediaData)) {
+            Log.i(TAG, "using game data from " + mediaData.getAbsolutePath());
+            data = mediaData;
+        }
         if (!hasGameData(data)) {
             Log.w(TAG, "no game data in " + data.getAbsolutePath()
                     + " - extract it from a WoW install and copy it here.");
