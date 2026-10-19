@@ -1,5 +1,6 @@
 #include "core/application.hpp"
 #include "core/frame_pacer.hpp"
+#include "core/env.hpp"
 #include "core/env_flag.hpp"
 #include "core/character_paths.hpp"
 #include "ui/settings_schema.hpp"
@@ -18,6 +19,7 @@
 #include "rendering/animation/animation_ids.hpp"
 #include "rendering/animation_controller.hpp"
 #include <bit>
+#include <fstream>
 #include <unordered_set>
 #include <cmath>
 #include <chrono>
@@ -367,6 +369,34 @@ bool Application::initialize() {
     // Try to get WoW data path from environment variable
     const char* dataPathEnv = std::getenv("WOW_DATA_PATH");
     std::string dataPath = dataPathEnv ? dataPathEnv : "./Data";
+
+#ifdef __ANDROID__
+    // Keep Android's media scanner out of the game data, and hand the Vulkan
+    // pipeline cache a directory that can actually be written.
+    //
+    // The scanner indexing the tens of thousands of asset files pegs a core
+    // and drags the whole device down for minutes after every asset update;
+    // a .nomedia file at the data root is the documented way to stop it, and
+    // it has to exist after a fresh install too, not just when someone
+    // remembers to push one by hand.
+    //
+    // HOME is "/" on Android and the working directory is not writable, so
+    // getPipelineCachePath's platform defaults silently failed there and every
+    // launch recompiled every pipeline from scratch - a first-load stutter,
+    // once per session, that no setting could avoid.
+    {
+        std::error_code ec;
+        const std::string noMedia = dataPath + "/.nomedia";
+        if (!std::filesystem::exists(noMedia, ec)) {
+            std::ofstream(noMedia, std::ios::binary).put('\n');
+        }
+        const std::string cacheDir = dataPath + "/.cache";
+        std::filesystem::create_directories(cacheDir, ec);
+        if (!std::getenv("WOWEE_CACHE_DIR")) {
+            wowee::core::setEnvVar("WOWEE_CACHE_DIR", cacheDir.c_str());
+        }
+    }
+#endif
 
     // The client's own expansion tables, into the extraction it is about to
     // read them from. Without this an extraction in the per-user directory -
