@@ -2,6 +2,15 @@ name: Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      variant:
+        description: 'Build variant (debug is debuggable, needed for run-as data pokes)'
+        required: true
+        default: release
+        type: choice
+        options:
+          - release
+          - debug
 
 permissions:
   contents: write
@@ -60,19 +69,24 @@ jobs:
       working-directory: android
       run: |
         export ANDROID_NDK_ROOT="${ANDROID_HOME}/ndk/${NDK_VERSION}"
-        ./gradlew :app:assembleRelease --no-daemon
+        if [ "${{ inputs.variant }}" = "debug" ]; then
+          ./gradlew :app:assembleDebug --no-daemon
+        else
+          ./gradlew :app:assembleRelease --no-daemon
+        fi
 
     - name: Stage the APK
       run: |
-        APK=android/app/build/outputs/apk/release/app-release.apk
-        test -f "${APK}" || APK=android/app/build/outputs/apk/release/app-release-unsigned.apk
-        cp "${APK}" wowee-android-arm64.apk
+        VARIANT="${{ inputs.variant }}"
+        APK="android/app/build/outputs/apk/${VARIANT}/app-${VARIANT}.apk"
+        test -f "${APK}" || APK="android/app/build/outputs/apk/${VARIANT}/app-${VARIANT}-unsigned.apk"
+        cp "${APK}" "wowee-android-arm64-${VARIANT}.apk"
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v7
       with:
-        name: wowee-android-arm64-apk
-        path: wowee-android-arm64.apk
+        name: wowee-android-arm64-apk-${{ inputs.variant }}
+        path: wowee-android-arm64-${{ inputs.variant }}.apk
         if-no-files-found: error
 
     - name: Publish APK as a Release
@@ -80,10 +94,11 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: |
         # One rolling tag so the download link never changes between builds.
+        APK="wowee-android-arm64-${{ inputs.variant }}.apk"
         if gh release view apk-latest >/dev/null 2>&1; then
-          gh release upload apk-latest wowee-android-arm64.apk --clobber
+          gh release upload apk-latest "${APK}" --clobber
         else
-          gh release create apk-latest wowee-android-arm64.apk \
+          gh release create apk-latest "${APK}" \
             --title "Android APK (arm64)" \
-            --notes "Instale o arquivo wowee-android-arm64.apk no Android (arm64, minSdk 33). Cada execucao do workflow substitui o APK desta mesma pagina."
+            --notes "Instale o wowee-android-arm64-release.apk no Android (arm64, minSdk 33). Cada execucao do workflow substitui os APKs desta mesma pagina."
         fi
