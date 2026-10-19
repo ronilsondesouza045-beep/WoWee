@@ -29,8 +29,19 @@ jobs:
 
     - name: Install the NDK the project pins
       run: |
-        yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" \
-          --install "ndk;${NDK_VERSION}" "platforms;android-34" "build-tools;34.0.0" >/dev/null
+        # The NDK zip is big and its download does flake; retry a few times.
+        SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+        for attempt in 1 2 3; do
+          if yes | "$SDKMANAGER" --install "ndk;${NDK_VERSION}" \
+              "platforms;android-34" "build-tools;34.0.0" >/tmp/sdkmanager.log 2>&1; then
+            echo "sdkmanager ok on attempt ${attempt}"
+            exit 0
+          fi
+          echo "sdkmanager failed on attempt ${attempt}:"
+          tail -20 /tmp/sdkmanager.log
+          sleep $((attempt * 15))
+        done
+        exit 1
 
     - name: Cache OpenSSL for Android
       id: cache-openssl
