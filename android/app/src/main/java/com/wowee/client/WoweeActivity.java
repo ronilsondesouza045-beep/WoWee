@@ -88,6 +88,11 @@ public class WoweeActivity extends SDLActivity {
             setEnv("WOWEE_LOG_LEVEL", level);
         }
 
+        String frameProfile = systemProperty("debug.wowee.frame_profile");
+        if (frameProfile != null && !frameProfile.isEmpty() && !"0".equals(frameProfile)) {
+            setEnv("WOWEE_FRAME_PROFILE", "1");
+        }
+
         setEnv("WOWEE_RESOURCE_ROOT", root.getAbsolutePath());
         setEnv("WOW_DATA_PATH", data.getAbsolutePath());
         setEnv("WOWEE_CONFIG_ROOT", new File(root, "config").getAbsolutePath());
