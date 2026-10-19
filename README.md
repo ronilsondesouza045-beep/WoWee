@@ -4,13 +4,14 @@
 
 Cliente **World of Warcraft 3.3.5 (WotLK)** para **Android arm64**, otimizado para rodar bem em celular: menos uso de memória, carregamento mais rápido e mais FPS.
 
-## Baixar e instalar
+## Como jogar
 
-1. Baixe o APK em **[Releases → apk-latest](https://github.com/ronilsondesouza045-beep/WoWee/releases/tag/apk-latest)**.
-2. Instale no celular (permita "instalar de fontes desconhecidas").
-3. Abra o app e entre no mundo.
+1. **Instale o APK** — baixe em **[Releases → apk-latest](https://github.com/ronilsondesouza045-beep/WoWee/releases/tag/apk-latest)** e instale no celular (permita "instalar de fontes desconhecidas"). Não precisa de root.
+2. **Baixe os dados do jogo** — pasta no MEGA: **[clique aqui para baixar (~12 GB)](https://mega.nz/folder/LZxAHBjD#Wft7ptOnngc2uoZjIahvjA)**. Baixe pelo app MEGA ou pelo navegador.
+3. **Copie a pasta `Data`** para `Android/media/com.wowee.client/Data` (crie as pastas se não existirem). Se o download vier em `.zip`, extraia antes.
+4. **Abra o app**, escolha o servidor na tela de login e entre no mundo.
 
-**É só instalar o APK — não precisa de root.** Para jogar, os dados do jogo 3.3.5 precisam estar no aparelho, na pasta `Android/media/com.wowee.client/Data`.
+Dica: no celular, use o app **MEGA** para baixar e um gerenciador de arquivos (ex.: ZArchiver) para mover a pasta `Data` para o caminho acima.
 
 ## Desenvolvedor
 
@@ -18,7 +19,7 @@ Cliente **World of Warcraft 3.3.5 (WotLK)** para **Android arm64**, otimizado pa
 - WhatsApp: **(21) 98902-4806**
 - Suporte, versões personalizadas ou trabalhos de desenvolvimento: é só chamar.
 
-> APK e otimizações por GMDERKEN. Projeto base open-source: [WoWee](https://github.com/Kelsidavis/WoWee).
+> APK e otimizações por GMDERKEN. Projeto base open-source: [WoWee](https://github.com/Kelsidavis/WoWee). World of Warcraft e seus dados são © Blizzard Entertainment.
 
 ---
 
