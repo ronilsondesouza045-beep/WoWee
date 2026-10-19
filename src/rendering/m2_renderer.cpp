@@ -1057,8 +1057,8 @@ bool M2Renderer::initialize(VkContext* ctx, VkDescriptorSetLayout perFrameLayout
         }
     }
     textureCacheBudgetBytes_ =
-        envSizeMBOrDefault("WOWEE_M2_TEX_CACHE_MB", 4096) * 1024ull * 1024ull;
-    modelCacheLimit_ = envSizeMBOrDefault("WOWEE_M2_MODEL_LIMIT", 6000);
+        adaptiveTexCacheBudgetBytes("WOWEE_M2_TEX_CACHE_MB", 4096, 0.060);
+    modelCacheLimit_ = adaptiveModelCacheLimit("WOWEE_M2_MODEL_LIMIT", 6000, 375.0);
     LOG_INFO("M2 texture cache budget: ", textureCacheBudgetBytes_ / (1024 * 1024), " MB");
     LOG_INFO("M2 model cache limit: ", modelCacheLimit_);
 

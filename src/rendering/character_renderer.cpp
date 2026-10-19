@@ -474,7 +474,8 @@ bool CharacterRenderer::initialize(VkContext* ctx, VkDescriptorSetLayout perFram
     createFallbackTextures(device);
 
     // Diagnostics-only: cache lifetime is currently tied to renderer lifetime.
-    textureCacheBudgetBytes_ = envSizeMBOrDefault("WOWEE_CHARACTER_TEX_CACHE_MB", 4096) * 1024ull * 1024ull;
+    textureCacheBudgetBytes_ =
+        adaptiveTexCacheBudgetBytes("WOWEE_CHARACTER_TEX_CACHE_MB", 4096, 0.025);
     LOG_INFO("Character texture cache budget: ", textureCacheBudgetBytes_ / (1024 * 1024), " MB");
 
     core::Logger::getInstance().info("Character renderer initialized (Vulkan)");

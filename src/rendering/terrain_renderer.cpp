@@ -211,7 +211,7 @@ bool TerrainRenderer::initialize(VkContext* ctx, VkDescriptorSetLayout perFrameL
     opaqueAlphaTexture->createSampler(device, VK_FILTER_LINEAR, VK_FILTER_LINEAR,
                                        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
     textureCacheBudgetBytes_ =
-        envSizeMBOrDefault("WOWEE_TERRAIN_TEX_CACHE_MB", 4096) * 1024ull * 1024ull;
+        adaptiveTexCacheBudgetBytes("WOWEE_TERRAIN_TEX_CACHE_MB", 4096, 0.050);
     LOG_INFO("Terrain texture cache budget: ", textureCacheBudgetBytes_ / (1024 * 1024), " MB");
 
     // Allocate mega vertex/index buffers and indirect draw buffer.

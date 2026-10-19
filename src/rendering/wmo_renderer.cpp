@@ -298,8 +298,8 @@ bool WMORenderer::initialize(VkContext* ctx, VkDescriptorSetLayout perFrameLayou
     flatNormalTexture_->createSampler(device, VK_FILTER_LINEAR, VK_FILTER_LINEAR,
                                        VK_SAMPLER_ADDRESS_MODE_REPEAT);
     textureCacheBudgetBytes_ =
-        envSizeMBOrDefault("WOWEE_WMO_TEX_CACHE_MB", 8192) * 1024ull * 1024ull;
-    modelCacheLimit_ = envSizeMBOrDefault("WOWEE_WMO_MODEL_LIMIT", 4000);
+        adaptiveTexCacheBudgetBytes("WOWEE_WMO_TEX_CACHE_MB", 8192, 0.065);
+    modelCacheLimit_ = adaptiveModelCacheLimit("WOWEE_WMO_MODEL_LIMIT", 4000, 250.0);
     core::Logger::getInstance().info("WMO texture cache budget: ",
                                      textureCacheBudgetBytes_ / (1024 * 1024), " MB");
     core::Logger::getInstance().info("WMO model cache limit: ", modelCacheLimit_);
