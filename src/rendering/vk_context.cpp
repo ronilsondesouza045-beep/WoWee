@@ -1118,6 +1118,11 @@ bool VkContext::createAllocator() {
 // ---------------------------------------------------------------------------
 
 static std::string getPipelineCachePath() {
+    // A writable directory the host application knows about. Android's HOME is
+    // "/" and the working directory is not writable, so the platform defaults
+    // below failed there in silence and every launch recompiled every pipeline.
+    if (const char* cacheDir = std::getenv("WOWEE_CACHE_DIR"))
+        return std::string(cacheDir) + "/pipeline_cache.bin";
 #ifdef _WIN32
     if (const char* appdata = std::getenv("APPDATA"))
         return std::string(appdata) + "\\wowee\\pipeline_cache.bin";

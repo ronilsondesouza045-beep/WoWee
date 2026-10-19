@@ -8,6 +8,10 @@
 #include <limits>
 #include <cstdlib>
 
+#if !defined(_WIN32)
+#include <unistd.h>
+#endif
+
 #include "core/env_flag.hpp"
 
 namespace wowee {
@@ -196,6 +200,74 @@ inline size_t envSizeOrDefault(const char* name, size_t defValue) {
     unsigned long long n = std::strtoull(v, &end, 10);
     if (end == v || n == 0) return defValue;
     return static_cast<size_t>(n);
+}
+
+// Physical RAM in bytes; 0 when it cannot be determined. On Windows no probe
+// is made and the desktop-sized defaults are simply kept - which is where they
+// were chosen, and the platform those defaults are right for.
+inline uint64_t totalPhysicalRamBytes() {
+#if defined(_WIN32)
+    return 0;
+#else
+    const long pages = sysconf(_SC_PHYS_PAGES);
+    const long pageSize = sysconf(_SC_PAGE_SIZE);
+    if (pages <= 0 || pageSize <= 0) return 0;
+    return static_cast<uint64_t>(pages) * static_cast<uint64_t>(pageSize);
+#endif
+}
+
+// A texture-cache budget sized to the machine instead of to a desktop.
+//
+// The fixed defaults (4 GB per cache, 8 GB for WMO) are affordable on a
+// desktop and fatal on a phone: a city fills every cache and the kernel starts
+// swapping memory that is not there, which is how Shattrath came to run at
+// 3 fps with 3 GB of cache resident. The budget here is a share of total RAM,
+// with the four texture-cache shares summing to about a fifth of it - the rest
+// stays for geometry, the driver and the frame itself. Machines with 16 GB or
+// more keep the old default untouched. An explicit environment value always
+// wins, so the fixed numbers remain reachable.
+inline uint64_t adaptiveTexCacheBudgetBytes(const char* name, size_t desktopDefaultMb,
+                                            double shareOfRam) {
+    if (const char* v = std::getenv(name)) {
+        if (*v) {
+            char* end = nullptr;
+            const unsigned long long mb = std::strtoull(v, &end, 10);
+            if (end != v && mb > 0)
+                return static_cast<uint64_t>(mb) * 1024ull * 1024ull;
+        }
+    }
+    const uint64_t desktopBytes =
+        static_cast<uint64_t>(desktopDefaultMb) * 1024ull * 1024ull;
+    const uint64_t ram = totalPhysicalRamBytes();
+    if (ram == 0 || ram >= (16ull << 30)) return desktopBytes;
+    uint64_t bytes = static_cast<uint64_t>(static_cast<double>(ram) * shareOfRam);
+    const uint64_t floorBytes = 96ull * 1024ull * 1024ull;
+    if (bytes < floorBytes) bytes = floorBytes;
+    if (bytes > desktopBytes) bytes = desktopBytes;
+    return bytes;
+}
+
+// The same scaling for model-cache counts. Models are never evicted - the cap
+// is the only bound on that cache - so a limit sized for a desktop session
+// (thousands of models) is more pinned RAM than a phone can hold. Scales with
+// RAM and never rises above the desktop default.
+inline size_t adaptiveModelCacheLimit(const char* name, size_t desktopDefault,
+                                      double modelsPerRamGb) {
+    if (const char* v = std::getenv(name)) {
+        if (*v) {
+            char* end = nullptr;
+            const unsigned long long n = std::strtoull(v, &end, 10);
+            if (end != v && n > 0) return static_cast<size_t>(n);
+        }
+    }
+    const uint64_t ram = totalPhysicalRamBytes();
+    if (ram == 0 || ram >= (16ull << 30)) return desktopDefault;
+    size_t limit = static_cast<size_t>(
+        static_cast<double>(ram >> 30) * modelsPerRamGb);
+    const size_t floor = 800;
+    if (limit < floor) limit = floor;
+    if (limit > desktopDefault) limit = desktopDefault;
+    return limit;
 }
 
 // Opt-in rendering diagnostics, read once per process. These exist to bisect a
