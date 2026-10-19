@@ -595,10 +595,14 @@ bool VkContext::selectPhysicalDevice() {
     props2.pNext = &dsResolveProps;
     vkGetPhysicalDeviceProperties2(physicalDevice, &props2);
 
-    // Gate on instance API version - vkCreateRenderPass2 is core 1.2 and only
-    // available when the instance was created with apiVersion >= 1.2.
-    // The device may report 1.2+ but a 1.1 instance won't have the function pointer.
-    if (instanceApiVersion_ >= VK_API_VERSION_1_2) {
+    // Gate on BOTH API versions. vkCreateRenderPass2 is core 1.2 and a
+    // device-level command, resolved through vkGetDeviceProcAddr: a 1.1
+    // instance has no pointer for it, and a 1.1 device leaves the pointer
+    // null even when the loader's instance is 1.3. Seen on an Adreno 642L
+    // (instance 1.3, device 1.1.128): the depth-resolve path called the null
+    // pointer on the first frame and took SIGSEGV at pc=0.
+    if (instanceApiVersion_ >= VK_API_VERSION_1_2 &&
+        deviceApiVersion_ >= VK_API_VERSION_1_2) {
         VkResolveModeFlags modes = dsResolveProps.supportedDepthResolveModes;
         if (modes & VK_RESOLVE_MODE_SAMPLE_ZERO_BIT) {
             depthResolveMode_ = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
