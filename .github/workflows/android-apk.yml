@@ -1,0 +1,78 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  NDK_VERSION: 28.2.13676358
+
+jobs:
+  apk:
+    name: Build APK (arm64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        submodules: true
+
+    - name: Set up JDK
+      uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: Install the NDK the project pins
+      run: |
+        yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" \
+          --install "ndk;${NDK_VERSION}" "platforms;android-34" "build-tools;34.0.0" >/dev/null
+
+    - name: Cache OpenSSL for Android
+      id: cache-openssl
+      uses: actions/cache@v6
+      with:
+        path: build-android-deps
+        key: android-openssl-${{ hashFiles('tools/build-android-deps.sh') }}
+
+    - name: Build OpenSSL for arm64
+      if: steps.cache-openssl.outputs.cache-hit != 'true'
+      run: |
+        export ANDROID_NDK_ROOT="${ANDROID_HOME}/ndk/${NDK_VERSION}"
+        tools/build-android-deps.sh arm64-v8a
+
+    - name: Build the APK
+      working-directory: android
+      run: |
+        export ANDROID_NDK_ROOT="${ANDROID_HOME}/ndk/${NDK_VERSION}"
+        ./gradlew :app:assembleRelease --no-daemon
+
+    - name: Stage the APK
+      run: |
+        APK=android/app/build/outputs/apk/release/app-release.apk
+        test -f "${APK}" || APK=android/app/build/outputs/apk/release/app-release-unsigned.apk
+        cp "${APK}" wowee-android-arm64.apk
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: wowee-android-arm64-apk
+        path: wowee-android-arm64.apk
+        if-no-files-found: error
+
+    - name: Publish APK as a Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        # One rolling tag so the download link never changes between builds.
+        if gh release view apk-latest >/dev/null 2>&1; then
+          gh release upload apk-latest wowee-android-arm64.apk --clobber
+        else
+          gh release create apk-latest wowee-android-arm64.apk \
+            --title "Android APK (arm64)" \
+            --notes "Instale o arquivo wowee-android-arm64.apk no Android (arm64, minSdk 33). Cada execucao do workflow substitui o APK desta mesma pagina."
+        fi
