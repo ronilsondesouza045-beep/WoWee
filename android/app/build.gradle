@@ -114,10 +114,30 @@ android {
     // a desktop build directory is: everything, music included.
     sourceSets.debug.assets.srcDirs = [stagedMusic]
 
+    // A fixed key handed in through the repository secrets, so that every APK
+    // this fork publishes upgrades the previous one on the device instead of
+    // clashing with it. Without the secrets the stock debug signing stays.
+    signingConfigs {
+        if (System.getenv('WOWEE_KEYSTORE_FILE')) {
+            ci {
+                storeFile file(System.getenv('WOWEE_KEYSTORE_FILE'))
+                storePassword System.getenv('WOWEE_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('WOWEE_KEY_ALIAS')
+                keyPassword System.getenv('WOWEE_KEY_PASSWORD')
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.debug
+            def ciSigning = System.getenv('WOWEE_KEYSTORE_FILE') ? signingConfigs.ci : null
+            signingConfig ciSigning ?: signingConfigs.debug
+        }
+        debug {
+            if (System.getenv('WOWEE_KEYSTORE_FILE')) {
+                signingConfig signingConfigs.ci
+            }
         }
     }
     compileOptions {
