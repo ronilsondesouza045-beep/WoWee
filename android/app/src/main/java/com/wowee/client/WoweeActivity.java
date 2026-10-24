@@ -2,7 +2,6 @@ package com.wowee.client;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -45,12 +44,11 @@ public class WoweeActivity extends SDLActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // Everything below has to happen before super.onCreate, which loads the
         // native library and calls into main().
-        File root = getExternalFilesDir(null);
-        if (root == null) {
+        File root = GamePaths.root(this);
+        if (root.equals(getFilesDir())) {
             // No external volume mounted. filesDir always exists, and the
             // client will run from it, but the player cannot copy data in.
             Log.e(TAG, "no external files directory; falling back to internal storage");
-            root = getFilesDir();
         }
 
         try {
@@ -63,21 +61,13 @@ public class WoweeActivity extends SDLActivity {
             Log.e(TAG, "could not unpack packaged assets", e);
         }
 
-        File data = new File(root, "Data");
-        // Android 13 and newer stop adb from writing into Android/data, the
-        // directory above. Android/media/<package> stays both adb-writable and
-        // readable without permissions, so whoever cannot reach the first one
-        // puts the data under the second, and it is taken when it is the one
-        // that has it.
-        File mediaData = new File(Environment.getExternalStorageDirectory(),
-                "Android/media/" + getPackageName() + "/Data");
-        if (!hasGameData(data) && hasGameData(mediaData)) {
-            Log.i(TAG, "using game data from " + mediaData.getAbsolutePath());
-            data = mediaData;
+        File data = GamePaths.dataDir(this);
+        if (data.equals(GamePaths.mediaData(this))) {
+            Log.i(TAG, "using game data from " + data.getAbsolutePath());
         }
-        if (!hasGameData(data)) {
+        if (!GamePaths.hasGameData(data)) {
             Log.w(TAG, "no game data in " + data.getAbsolutePath()
-                    + " - extract it from a WoW install and copy it here.");
+                    + " - install it from the setup screen.");
         }
 
         // Warnings only by default, as on desktop. `adb shell setprop
@@ -117,32 +107,6 @@ public class WoweeActivity extends SDLActivity {
         } catch (ErrnoException e) {
             Log.e(TAG, "could not set " + name, e);
         }
-    }
-
-    /**
-     * True if anything other than the JSON profiles the APK itself carries is
-     * present, which is the cheapest test for "the player copied data in".
-     *
-     * A root that holds only expansions/ and opcodes/ still counts: the client
-     * reads all of its data through expansions/<id>/, and an expansion with a
-     * manifest.json beside it is a built set. Without this second look, a root
-     * whose every game file sits under an expansion - which is the layout the
-     * client itself writes and reads - is mistaken for an empty one.
-     */
-    private boolean hasGameData(File data) {
-        String[] entries = data.list();
-        if (entries == null) return false;
-        for (String entry : entries) {
-            if (!entry.equals("expansions") && !entry.equals("opcodes")) return true;
-        }
-        File expansions = new File(data, "expansions");
-        String[] ids = expansions.list();
-        if (ids != null) {
-            for (String id : ids) {
-                if (new File(expansions, id + "/manifest.json").isFile()) return true;
-            }
-        }
-        return false;
     }
 
     /**

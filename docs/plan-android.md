@@ -75,6 +75,9 @@ is pointed at that directory with `WOW_DATA_PATH`. The extraction tooling
 (`wowee_assets`, `asset_extract`) stays desktop-only and unchanged. It already
 supports Linux, macOS and Windows, and it is the same artefact either way.
 
+This fork adds an optional first-run downloader for an operator-hosted packed
+tree. The APK still ships no game data; see `docs/android-data-hosting.md`.
+
 The Android-specific question is *where* on the device, and scoped storage decides it:
 
 | Location | Permission | Works with native `fopen` | Verdict |
@@ -151,8 +154,8 @@ Phase 1 is a day's work. Phase 4 is the port.
 
 ## 4. Decisions taken, so they are not re-litigated
 
-- **Assets are never bundled and never downloaded by us.** The player extracts, as on desktop. This
-  follows from the release style, not from the file size.
+- **Assets are never bundled in the APK.** The player extracts, as on desktop, or downloads packs
+  from storage the operator controls. This follows from the release style, not from the file size.
 - **No SAF.** It would mean rewriting the asset layer around file descriptors to gain a directory
   picker.
 - **No Unicorn, no Warden emulation.** The stub branch exists and is checked.
@@ -310,3 +313,6 @@ walking each ADT for the models it references, which is phase 3 work and is not 
 and up. `adb push` and most USB connections still write it, but the player-facing answer is a
 first-run importer that asks for the extracted `Data/` folder through the storage access
 framework, which sidesteps the question entirely.
+
+This fork instead offers a first-run downloader for operator-hosted packs, which closes the same
+hole without SAF. The offline `adb push` path still works. See `docs/android-data-hosting.md`.

@@ -43,6 +43,13 @@ def gitVersionCode = {
 def stagedAssets = layout.buildDirectory.dir("staged-assets")
 def stagedMusic = layout.buildDirectory.dir("staged-music")
 
+def dataBaseUrl = System.getenv('WOWEE_DATA_URL')
+if (dataBaseUrl == null || dataBaseUrl.trim().isEmpty()) {
+    def property = project.findProperty('wowee.dataUrl')
+    dataBaseUrl = property != null ? property.toString() : 'https://SEU-SERVIDOR-AQUI/wowee/android'
+}
+dataBaseUrl = dataBaseUrl.trim().replace('\\', '\\\\').replace('"', '\\"')
+
 // The same payload the desktop and macOS releases ship: assets/ without the
 // original music, and the git-tracked Data JSONs. Game data is not here - the
 // player extracts that from their own install and copies it in.
@@ -88,6 +95,7 @@ android {
         targetSdk 34
         versionCode gitVersionCode
         versionName gitVersion
+        buildConfigField "String", "DATA_BASE_URL", "\"${dataBaseUrl}\""
 
         externalNativeBuild {
             cmake {
@@ -140,6 +148,10 @@ android {
             }
         }
     }
+    buildFeatures {
+        buildConfig true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17

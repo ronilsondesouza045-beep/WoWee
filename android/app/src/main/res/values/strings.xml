@@ -1,4 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WoWee</string>
+    <string name="setup_subtitle">Dados do jogo</string>
+    <string name="setup_wifi_only">Baixar somente pelo Wi-Fi</string>
+    <string name="setup_note">Os dados são baixados do servidor configurado pelo desenvolvedor. O download continua em segundo plano; você pode sair e voltar depois.</string>
+    <string name="setup_message">O aplicativo baixa os dados do jogo para este aparelho na primeira vez. Depois, só baixa o que mudar.</string>
+    <string name="setup_checking">Verificando o servidor de dados…</string>
+    <string name="setup_checking_updates">Verificando atualizações…</string>
+    <string name="setup_resuming">Retomando o download…</string>
+    <string name="setup_first_run">Primeira instalação</string>
+    <string name="setup_ready">Pronto para instalar</string>
+    <string name="setup_size">Download: %1$s\nInstalado: %2$s</string>
+    <string name="setup_download">Baixar dados</string>
+    <string name="setup_update">Atualizar dados</string>
+    <string name="setup_continue">Continuar download</string>
+    <string name="setup_exit">Sair</string>
+    <string name="setup_retry">Tentar novamente</string>
+    <string name="setup_start">Entrar no jogo</string>
+    <string name="setup_update_title">Atualização de dados</string>
+    <string name="setup_update_message">Há uma atualização de %1$s. Baixar agora?</string>
+    <string name="setup_update_now">Atualizar agora</string>
+    <string name="setup_update_later">Depois</string>
+    <string name="setup_downloading">Baixando dados…</string>
+    <string name="setup_waiting_network">Aguardando conexão…</string>
+    <string name="setup_pack_progress">Pacote %1$d de %2$d · %3$s</string>
+    <string name="setup_progress">%1$s de %2$s</string>
+    <string name="setup_checking_file">Conferindo arquivos já baixados…</string>
+    <string name="setup_verifying">Verificando o pacote…</string>
+    <string name="setup_extracting">Extraindo o pacote…</string>
+    <string name="setup_done">Dados instalados. Abrindo o jogo…</string>
+    <string name="setup_wifi_title">Usar dados móveis?</string>
+    <string name="setup_wifi_message">Você está usando dados móveis e o download tem %1$s. Recomendamos usar Wi-Fi.</string>
+    <string name="setup_download_anyway">Baixar mesmo assim</string>
+    <string name="setup_wifi_settings">Abrir Wi-Fi</string>
+    <string name="setup_error_config">O servidor de dados ainda não foi configurado neste APK.</string>
+    <string name="setup_error_manifest">Não foi possível acessar a lista de dados do servidor. Verifique a conexão e tente novamente.</string>
+    <string name="setup_error_no_data">Os dados do jogo não foram encontrados no aparelho. Baixe novamente.</string>
+    <string name="setup_error_network">Sem conexão com a internet. Verifique o Wi-Fi ou os dados móveis.</string>
+    <string name="setup_error_download">O download falhou. Tente novamente.</string>
+    <string name="setup_error_integrity">O arquivo baixado está corrompido. Ele será baixado de novo.</string>
+    <string name="setup_error_extract">Não foi possível extrair os dados. Verifique o espaço livre e tente novamente.</string>
+    <string name="setup_error_storage">Não foi possível criar a pasta de dados no aparelho.</string>
+    <string name="setup_error_space">Espaço insuficiente. Libere pelo menos %1$s.</string>
+    <string name="setup_error_space_device">O aparelho ficou sem espaço durante o download.</string>
+    <string name="setup_exit_title">Sair do app</string>
+    <string name="setup_exit_message">Sair agora? Se o download estiver em andamento, ele continua em segundo plano e retoma quando você abrir o app de novo.</string>
+    <string name="setup_cancel">Cancelar</string>
+    <string name="setup_client_title">Atualize o aplicativo</string>
+    <string name="setup_client_message">Esta versão do app é antiga para os dados disponíveis. Baixe a versão nova para continuar.</string>
+    <string name="setup_client_open">Baixar aplicativo</string>
+    <string name="setup_client_later">Continuar assim</string>
+    <plurals name="setup_packs">
+        <item quantity="one">%d pacote</item>
+        <item quantity="other">%d pacotes</item>
+    </plurals>
 </resources>

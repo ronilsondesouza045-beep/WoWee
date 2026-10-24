@@ -542,6 +542,9 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME android_data_profiles
              COMMAND ${Python3_EXECUTABLE}
                      ${CMAKE_SOURCE_DIR}/tools/android/test_data_profiles.py)
+    add_test(NAME android_data_packs
+             COMMAND ${Python3_EXECUTABLE}
+                     ${CMAKE_SOURCE_DIR}/tools/android/test_pack_data.py)
 endif()
 
 # ── test_chat_types ─────────────────────────────────────────────

@@ -7,6 +7,11 @@ screen and creating a character touches 4% of it.
 `data_profiles.json` defines the profiles. Nothing here extracts anything; run
 `extract_assets.sh` first, as on desktop, then cut the result down.
 
+The Android APK can download a profile instead of receiving it over USB. Pack a
+profile with `pack_data.py` and host the result; see
+`docs/android-data-hosting.md`. The `adb push` steps below remain the offline
+alternative.
+
 ```
 tools/android/make_minimal_data.py --source ~/Data --profile login --dry-run
 tools/android/make_minimal_data.py --source ~/Data --out ~/Data-login --profile login
@@ -49,6 +54,22 @@ exactly what it kept.
 The expansion profiles under `Data/expansions` and `Data/opcodes` come from this
 repository rather than from anyone's MPQs and are not in the manifest, so they
 are copied separately.
+
+## Packing for the in-app installer
+
+```
+python tools/android/pack_data.py --source ~/Data-login --out ~/dist --version 1
+python tools/android/pack_data.py --source ~/Data-login --out ~/dist --bump
+python tools/android/pack_data.py --source ~/Data-login --out ~/dist --version 1 --base-url https://cdn.example.com/wowee/android
+```
+
+The first run writes `dist/version.json` and `dist/packs/*.zip`. The second
+publishes an update and keeps pack names tied to the data version. The APK
+compares SHA-256 hashes, so only packs whose contents changed are downloaded.
+The manifest layout, hosting requirements and update flow are in
+`docs/android-data-hosting.md`.
+
+`test_pack_data.py` runs as the `android_data_packs` ctest.
 
 ## Checking a profile
 

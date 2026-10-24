@@ -7,6 +7,7 @@
                   android:version="0x00401000" android:required="true" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:label="@string/app_name"
@@ -15,21 +16,29 @@
         android:theme="@style/WoweeFullscreen"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="false"
         android:hasFragileUserData="true">
+
+        <activity
+            android:name="com.wowee.client.SetupActivity"
+            android:label="@string/app_name"
+            android:theme="@style/WoweeSetup"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name="com.wowee.client.WoweeActivity"
             android:label="@string/app_name"
             android:theme="@style/WoweeFullscreen"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:preferMinimalPostProcessing="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 </manifest>

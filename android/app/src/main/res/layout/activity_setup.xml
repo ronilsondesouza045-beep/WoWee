@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/setup_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="28dp"
+        android:paddingTop="44dp"
+        android:paddingRight="28dp"
+        android:paddingBottom="36dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/setup_gold"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/setup_subtitle"
+            android:textColor="@color/setup_muted"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/setup_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:lineSpacingExtra="4dp"
+            android:text="@string/setup_message"
+            android:textColor="@color/setup_text"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/setup_size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/setup_gold"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
+        <CheckBox
+            android:id="@+id/setup_wifi_only"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:buttonTint="@color/setup_gold"
+            android:text="@string/setup_wifi_only"
+            android:textColor="@color/setup_text"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/setup_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="28dp"
+            android:max="1000"
+            android:progressBackgroundTint="@color/setup_surface"
+            android:progressTint="@color/setup_gold" />
+
+        <TextView
+            android:id="@+id/setup_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/setup_text"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/setup_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/setup_muted"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/setup_primary"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="@color/setup_gold"
+            android:textAllCaps="false"
+            android:textColor="@color/setup_background"
+            android:textSize="17sp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/setup_secondary"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:textAllCaps="false"
+            android:textColor="@color/setup_muted"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/setup_note"
+            android:textColor="@color/setup_muted"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>

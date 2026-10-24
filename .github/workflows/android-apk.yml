@@ -81,6 +81,8 @@ jobs:
 
     - name: Build the APK
       working-directory: android
+      env:
+        WOWEE_DATA_URL: ${{ vars.WOWEE_DATA_URL }}
       run: |
         export ANDROID_NDK_ROOT="${ANDROID_HOME}/ndk/${NDK_VERSION}"
         if [ "${{ inputs.variant }}" = "debug" ]; then
@@ -114,5 +116,5 @@ jobs:
         else
           gh release create apk-latest "${APK}" \
             --title "Android APK (arm64)" \
-            --notes "Instale o wowee-android-arm64-release.apk no Android (arm64, minSdk 33). Cada execucao do workflow substitui os APKs desta mesma pagina."
+            --notes "Instale o wowee-android-arm64-release.apk no Android (arm64, minSdk 33). Na primeira abertura o app baixa os dados do servidor configurado em WOWEE_DATA_URL. Cada execucao do workflow substitui os APKs desta mesma pagina."
         fi

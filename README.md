@@ -7,11 +7,11 @@ Cliente **World of Warcraft 3.3.5 (WotLK)** para **Android arm64**, otimizado pa
 ## Como jogar
 
 1. **Instale o APK** — baixe em **[Releases → apk-latest](https://github.com/ronilsondesouza045-beep/WoWee/releases/tag/apk-latest)** e instale no celular (permita "instalar de fontes desconhecidas"). Não precisa de root.
-2. **Baixe os dados do jogo** — pasta no MEGA: **[clique aqui para baixar (~12 GB)](https://mega.nz/folder/LZxAHBjD#Wft7ptOnngc2uoZjIahvjA)**. Baixe pelo app MEGA ou pelo navegador.
-3. **Copie a pasta `Data`** para `Android/media/com.wowee.client/Data` (crie as pastas se não existirem). Se o download vier em `.zip`, extraia antes.
-4. **Abra o app**, escolha o servidor na tela de login e entre no mundo.
+2. **Abra o app e baixe os dados** — na primeira abertura, o app baixa e instala os dados do jogo automaticamente (cerca de 12 GB). Use Wi-Fi; o download continua em segundo plano e retoma se você sair e voltar.
+3. **Aguarde a instalação** — o app confere cada pacote e extrai os arquivos. Nas próximas aberturas ele baixa somente o que mudou.
+4. **Entre no jogo**, escolha o servidor na tela de login e entre no mundo.
 
-Dica: no celular, use o app **MEGA** para baixar e um gerenciador de arquivos (ex.: ZArchiver) para mover a pasta `Data` para o caminho acima.
+Se o seu APK não tiver um servidor de dados configurado, ou se preferir instalar sem baixar pelo app, baixe a pasta no MEGA: **[clique aqui (~12 GB)](https://mega.nz/folder/LZxAHBjD#Wft7ptOnngc2uoZjIahvjA)**. Extraia e copie `Data` para `Android/data/com.wowee.client/files/Data` (ou `Android/media/com.wowee.client/Data`); o app detecta os dados e não baixa nada.
 
 ## Desenvolvedor
 
@@ -320,6 +320,11 @@ is signed with the debug key, so Android asks you to allow installation from an
 unknown source.
 
 ### Game data on a phone
+
+An APK built with `WOWEE_DATA_URL` downloads its data on first launch: pack the
+tree with `tools/android/pack_data.py`, host `version.json` and `packs/`, and
+see `docs/android-data-hosting.md`. The steps below are the offline path, or
+the path for an APK with no data server configured.
 
 Extract on a desktop exactly as above. There is no need to extract on the
 device. A full extraction is around 18 GB, so cut it down to a profile that
